@@ -6,6 +6,12 @@
     <groupId>com.fernando</groupId>
     <artifactId>kafka-stream</artifactId>
     <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>kafka-simple-producer</module>
+        <module>kafka-simple-stream</module>
+        <module>core</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
