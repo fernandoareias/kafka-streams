@@ -1,0 +1,12 @@
+{
+  "namespace": "com.fernando",
+  "type": "record",
+  "name": "ClientCreatedEvent",
+  "fields": [
+    { "name": "key", "type": "string" },
+    { "name": "cardNumber", "type": "string" },
+    { "name": "proposalNumber", "type": "string" },
+    { "name": "document", "type": "string" },
+    { "name": "product", "type": "string" }
+  ]
+}

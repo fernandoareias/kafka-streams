@@ -1,0 +1,11 @@
+{
+  "namespace": "com.fernando",
+  "type": "record",
+  "name": "ProposalCreatedEvent",
+  "fields": [
+    { "name": "key", "type": "string" },
+    { "name": "proposalNumber", "type": "string" },
+    { "name": "proponentDocument", "type": "string" },
+    { "name": "product", "type": "string" }
+  ]
+}

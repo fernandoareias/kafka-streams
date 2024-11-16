@@ -8,6 +8,13 @@
         <artifactId>kafka-stream</artifactId>
         <version>1.0.0</version>
     </parent>
+    <repositories>
+        <repository>
+            <id>confluent</id>
+            <url>https://packages.confluent.io/maven/</url>
+        </repository>
+    </repositories>
+
 
     <artifactId>kafka-simple-stream</artifactId>
     <dependencies>
@@ -28,21 +35,35 @@
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.32</version>
         </dependency>
+
         <dependency>
-            <groupId>org.fernando</groupId>
-            <artifactId>core</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-avro-serializer</artifactId>
+            <version>7.0.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+            <version>1.10.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-streams-avro-serde</artifactId>
+            <version>7.0.0</version> <!-- Use a versão do Confluent compatível com seu Kafka -->
+        </dependency>
+
         <dependency>
             <groupId>com.fernando</groupId>
             <artifactId>core</artifactId>
             <version>1.0.0</version>
-            <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
-            <version>3.7.1</version> <!-- Verifique a versão mais recente no site oficial do Apache Kafka -->
+            <version>3.7.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>

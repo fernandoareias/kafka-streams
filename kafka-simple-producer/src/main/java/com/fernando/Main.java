@@ -1,6 +1,8 @@
 package com.fernando;
 
 
+import com.fernando.factories.CreditCardEventFactory;
+import com.fernando.factories.ProposalEventFactory;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
@@ -12,32 +14,13 @@ import java.util.concurrent.ThreadPoolExecutor;
 import static java.lang.Thread.ofVirtual;
 
 public class Main {
-
-
     public static void main(String[] args) {
+        var producer = new ProducerKafka();
 
         for(int x = 0; x < 20; x++){
-            ProducerKafka producerProposal = new ProducerKafka("event-proposal-created", new ProposalCreatedEvent());
-            ProducerKafka producerCreditCard = new ProducerKafka("event-credit-card-created", new CreditCardCreated());
-
-            producerProposal.start();
-            producerCreditCard.start();
-
-            producerProposal.finish();
-            producerCreditCard.finish();
+            producer.sendEvent(ProposalEventFactory.createRandomProposalCreatedEvent());
+            producer.sendEvent(CreditCardEventFactory.createRandomCreditCardCreatedEvent());
         }
-//
-//        Thread thread1 = ofVirtual().start(producerProposal::start);
-//        Thread thread2 = ofVirtual().start(producerCreditCard::start);
-//
-//        try {
-//            thread1.join();
-//            thread2.join();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//
-
     }
 
 }

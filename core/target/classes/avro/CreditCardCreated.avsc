@@ -1,0 +1,10 @@
+{
+  "namespace": "com.fernando",
+  "type": "record",
+  "name": "CreditCardCreated",
+  "fields": [
+    { "name": "key", "type": "string" },
+    { "name": "cardNumber", "type": "string" },
+    { "name": "portadorDocument", "type": "string" }
+  ]
+}

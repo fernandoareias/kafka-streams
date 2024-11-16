@@ -1,25 +1,26 @@
 version: "3.9"
 
 networks:
-  kafka_network:  # Define uma rede compartilhada
+  kafka_network:
     driver: bridge
 
 services:
-  kafka-ui:
-    container_name: kafka-ui
-    image: provectuslabs/kafka-ui:latest
-    platform: linux/amd64
+  redpanda-console:
+    image: docker.redpanda.com/redpandadata/console:latest
     ports:
-      - 8080:8080
+      - 8083:8080
+    environment:
+      KAFKA_BROKERS: "kafka1:9092,kafka2:9092,kafka3:9092"
+      SCHEMA_REGISTRY_ENABLED: "true"
+      SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      CONSOLE_ENABLE_BASIC_AUTH: "false"
+    networks:
+      - kafka_network
     depends_on:
       - kafka1
       - kafka2
       - kafka3
-    environment:
-      - KAFKA_CLUSTERS_0_NAME=local
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka1:9092,kafka2:9092,kafka3:9092
-    networks:
-      - kafka_network
+      - schema-registry
 
   kafka1:
     image: 'bitnami/kafka:latest'
@@ -39,6 +40,8 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka1:9092,EXTERNAL://127.0.0.1:19090
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9094,2@kafka2:9094,3@kafka3:9094
       - ALLOW_PLAINTEXT_LISTENER=yes
+    volumes:
+      - ./infrastructure/kafka1:/bitnami/kafka
     networks:
       - kafka_network
 
@@ -60,6 +63,8 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka2:9092,EXTERNAL://127.0.0.1:19091
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9094,2@kafka2:9094,3@kafka3:9094
       - ALLOW_PLAINTEXT_LISTENER=yes
+    volumes:
+      - ./infrastructure/kafka2:/bitnami/kafka
     networks:
       - kafka_network
 
@@ -81,6 +86,24 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka3:9092,EXTERNAL://127.0.0.1:19092
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9094,2@kafka2:9094,3@kafka3:9094
       - ALLOW_PLAINTEXT_LISTENER=yes
+    volumes:
+      - ./infrastructure/kafka3:/bitnami/kafka
+    networks:
+      - kafka_network
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:latest
+    platform: linux/amd64
+    ports:
+      - 8081:8081
+    environment:
+      - SCHEMA_REGISTRY_HOST_NAME=schema-registry
+      - SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS=PLAINTEXT://kafka1:9092
+      - SCHEMA_REGISTRY_LISTENERS=http://0.0.0.0:8081
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
     networks:
       - kafka_network
 

@@ -1,71 +1,85 @@
 package com.fernando;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 public class ProducerKafka {
     private static final Properties properties = new Properties();
     private static final String bootstrapServers = "127.0.0.1:19090,127.0.0.1:19091,127.0.0.1:19092";
-    private static final Logger logger = LoggerFactory.getLogger(Main.class);
-    private static KafkaProducer<String, String> producer;
-    private String topic;
-    private MyEvent event;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final Logger logger = LoggerFactory.getLogger(ProducerKafka.class);
 
-    public ProducerKafka(String topic, MyEvent event) {
+    private static final KafkaProducer<String, Object> producer;
+
+    private static final Map<Class<?>, String> eventTopicMap = new HashMap<>();
+
+    static {
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-
-        properties.setProperty(ProducerConfig.ACKS_CONFIG, "1");
+        properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
+        properties.setProperty("schema.registry.url", "http://localhost:8081");
+        properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
+        properties.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
         properties.setProperty(ProducerConfig.RETRIES_CONFIG, Integer.toString(Integer.MAX_VALUE));
         properties.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "5");
 
-       producer = new KafkaProducer<>(properties);
-       this.topic = topic;
-       this.event = event;
+        producer = new KafkaProducer<>(properties);
 
+        eventTopicMap.put(CreditCardCreated.class, "event-credit-card-created");
+        eventTopicMap.put(ProposalCreatedEvent.class, "event-proposal-created");
     }
 
-    public void start(){
+    public void sendEvent(Object event) {
+        String topic = eventTopicMap.get(event.getClass());
 
-       try  {
-           String jsonEvent = objectMapper.writeValueAsString(event);
-           logger.info(String.format("Message: %s", jsonEvent));
-           ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topic, event.getKey(), jsonEvent);
-           producer.send(producerRecord, handleSend());
+        if (topic == null) {
+            throw new IllegalArgumentException("Nenhum tópico mapeado para o tipo de evento: " + event.getClass().getName());
+        }
 
+        String key = extractKey(event);
 
-       }catch (Exception e){
-
-       }
+        try {
+            logger.info("Enviando mensagem: " + event + " | topic: " + topic);
+            ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(topic, key, event);
+            producer.send(producerRecord, handleSend()).get();
+        } catch (Exception e) {
+            logger.error("Erro ao enviar a mensagem", e);
+            Thread.currentThread().interrupt();
+        }
     }
 
-    public void finish(){
+    public void finish() {
         producer.flush();
         producer.close();
     }
 
-    private static Callback handleSend(){
-        return new Callback() {
-            @Override
-            public void onCompletion(RecordMetadata recordMetadata, Exception e) {
-                if (e == null) {
-                    logger.info("Received new metadata. " +
-                            "Topic:" + recordMetadata.topic() +
-                            "Partition: " + recordMetadata.partition() +
-                            "Offset: " + recordMetadata.offset() +
-                            "Timestamp: " + recordMetadata.timestamp());
-                } else {
-                    logger.error("Error while producing", e);
-                }
+    private static Callback handleSend() {
+        return (recordMetadata, e) -> {
+            if (e == null) {
+                logger.info("Nova metadata recebida: " +
+                        "Tópico: " + recordMetadata.topic() +
+                        " Partição: " + recordMetadata.partition() +
+                        " Offset: " + recordMetadata.offset() +
+                        " Timestamp: " + recordMetadata.timestamp());
+            } else {
+                logger.error("Erro ao produzir", e);
             }
         };
+    }
+
+    private String extractKey(Object event) {
+        if (event instanceof CreditCardCreated) {
+            return ((CreditCardCreated) event).getPortadorDocument().toString();
+        } else if (event instanceof ProposalCreatedEvent) {
+            return ((ProposalCreatedEvent) event).getProponentDocument().toString();
+        } else {
+            return "default-key";
+        }
     }
 }
