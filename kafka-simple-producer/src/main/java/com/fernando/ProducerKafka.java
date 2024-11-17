@@ -24,10 +24,15 @@ public class ProducerKafka {
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
         properties.setProperty("schema.registry.url", "http://localhost:8081");
-        properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
-        properties.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
-        properties.setProperty(ProducerConfig.RETRIES_CONFIG, Integer.toString(Integer.MAX_VALUE));
+
+
+        properties.setProperty(ProducerConfig.ACKS_CONFIG, "1");
+        properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, Integer.toString(32 * 1024)); // 32 KB por batch
+        properties.setProperty(ProducerConfig.LINGER_MS_CONFIG, "5");
+        properties.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG, "gzip");
+
         properties.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "5");
+        properties.setProperty(ProducerConfig.BUFFER_MEMORY_CONFIG, Long.toString(64 * 1024 * 1024)); // 64 MB de buffer
 
         producer = new KafkaProducer<>(properties);
 
@@ -44,14 +49,9 @@ public class ProducerKafka {
 
         String key = extractKey(event);
 
-        try {
-            logger.info("Enviando mensagem: " + event + " | topic: " + topic);
-            ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(topic, key, event);
-            producer.send(producerRecord, handleSend()).get();
-        } catch (Exception e) {
-            logger.error("Erro ao enviar a mensagem", e);
-            Thread.currentThread().interrupt();
-        }
+        ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(topic, key, event);
+
+        producer.send(producerRecord, handleSend());
     }
 
     public void finish() {
@@ -62,11 +62,9 @@ public class ProducerKafka {
     private static Callback handleSend() {
         return (recordMetadata, e) -> {
             if (e == null) {
-                logger.info("Nova metadata recebida: " +
-                        "Tópico: " + recordMetadata.topic() +
-                        " Partição: " + recordMetadata.partition() +
-                        " Offset: " + recordMetadata.offset() +
-                        " Timestamp: " + recordMetadata.timestamp());
+                logger.info("Mensagem enviada com sucesso para o tópico: " + recordMetadata.topic() +
+                        ", partição: " + recordMetadata.partition() +
+                        ", offset: " + recordMetadata.offset());
             } else {
                 logger.error("Erro ao produzir", e);
             }

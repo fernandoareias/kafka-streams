@@ -1,3 +1,4 @@
-com/fernando/JsonSerde.class
+com/fernando/KafkaSimpleKStream.class
 com/fernando/Main.class
-com/fernando/KafkaSimpleStream.class
+com/fernando/KafkaSimpleKTable.class
+com/fernando/KafkaSimpleKStream$1.class

@@ -1,7 +1,5 @@
 /Users/fernandoareias/Documents/dev/kafka-stream/core/target/generated-sources/avro/com/fernando/CreditCardCreated.java
 /Users/fernandoareias/Documents/dev/kafka-stream/core/target/generated-sources/avro/com/fernando/ProposalCreatedEvent.java
-/Users/fernandoareias/Documents/dev/kafka-stream/core/src/main/java/com/fernando/ProposalCreatedEvent.java
-/Users/fernandoareias/Documents/dev/kafka-stream/core/src/main/java/com/fernando/ClientCreatedEvent.java
+/Users/fernandoareias/Documents/dev/kafka-stream/core/src/main/java/com/fernando/factories/CreditCardEventFactory.java
 /Users/fernandoareias/Documents/dev/kafka-stream/core/target/generated-sources/avro/com/fernando/ClientCreatedEvent.java
-/Users/fernandoareias/Documents/dev/kafka-stream/core/src/main/java/com/fernando/MyEvent.java
-/Users/fernandoareias/Documents/dev/kafka-stream/core/src/main/java/com/fernando/CreditCardCreated.java
+/Users/fernandoareias/Documents/dev/kafka-stream/core/src/main/java/com/fernando/factories/ProposalEventFactory.java

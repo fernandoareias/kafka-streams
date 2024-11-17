@@ -1,22 +1,27 @@
 package com.fernando;
 
-public class Main {
-    public static void main(String[] args) {
-        KafkaSimpleKTable ktable = new KafkaSimpleKTable();
-//        KafkaSimpleKStream kstreamPrivate = new KafkaSimpleKStream("P");
-//        KafkaSimpleKStream kstreamConsignado = new KafkaSimpleKStream("C");
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-        //var threadKTable = Thread.ofVirtual().start(ktable::startStream);
-//        var threadStreamPrivate = Thread.ofVirtual().start(kstreamPrivate::startStream);
-//        var threadStreamConsignado = Thread.ofVirtual().start(kstreamConsignado::startStream);
+public class Main {
+
+    private static final Logger logger  = LoggerFactory.getLogger(Main.class);
+
+    public static void main(String[] args) {
+        var eventStream = new KafkaSimpleKTable();
+        var privateStream = new KafkaSimpleKStream("P");
+        var consignadoStream = new KafkaSimpleKStream("C");
+
+        var threadKTable = Thread.ofPlatform().start(eventStream::startStream);
+        var threadStreamPrivate = Thread.ofPlatform().start(privateStream::startStream);
+        var threadStreamConsignado = Thread.ofPlatform().start(consignadoStream::startStream);
 
         try {
-            ktable.startStream();
-            //threadKTable.join();
-//            threadStreamPrivate.join();
-//            threadStreamConsignado.join();
+           threadKTable.join();
+            threadStreamPrivate.join();
+            threadStreamConsignado.join();
         } catch (Exception e) {
-            System.out.println(e.toString());
+            logger.error(e.toString());
         }
     }
 }

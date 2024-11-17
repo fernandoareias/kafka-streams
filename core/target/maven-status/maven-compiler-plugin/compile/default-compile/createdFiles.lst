@@ -1,0 +1,8 @@
+com/fernando/CreditCardCreated.class
+com/fernando/ClientCreatedEvent.class
+com/fernando/factories/ProposalEventFactory.class
+com/fernando/factories/CreditCardEventFactory.class
+com/fernando/ClientCreatedEvent$Builder.class
+com/fernando/ProposalCreatedEvent$Builder.class
+com/fernando/ProposalCreatedEvent.class
+com/fernando/CreditCardCreated$Builder.class
