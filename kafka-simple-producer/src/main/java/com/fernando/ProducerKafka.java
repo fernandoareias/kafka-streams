@@ -12,7 +12,7 @@ import java.util.Properties;
 
 public class ProducerKafka {
     private static final Properties properties = new Properties();
-    private static final String bootstrapServers = "127.0.0.1:19090,127.0.0.1:19091,127.0.0.1:19092";
+    private static final String bootstrapServers = System.getenv("KAFKA_BROKERS");
     private static final Logger logger = LoggerFactory.getLogger(ProducerKafka.class);
 
     private static final KafkaProducer<String, Object> producer;
@@ -23,7 +23,7 @@ public class ProducerKafka {
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
-        properties.setProperty("schema.registry.url", "http://localhost:8081");
+        properties.setProperty("schema.registry.url", System.getenv("SCHEMA_REGISTRY"));
 
 
         properties.setProperty(ProducerConfig.ACKS_CONFIG, "1");

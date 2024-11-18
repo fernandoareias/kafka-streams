@@ -5,6 +5,45 @@ networks:
     driver: bridge
 
 services:
+  producer-app:
+    build:
+      context: .
+      dockerfile: kafka-simple-producer/Dockerfile
+    environment:
+      - KAFKA_BROKERS=kafka1:9092,kafka2:9092,kafka3:9092
+      - SCHEMA_REGISTRY=http://schema-registry:8081
+      - TARGET_RATE=2000
+      - BATCH_SIZE=10
+      - MAVEN_OPTS=-X
+    networks:
+      - kafka_network
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+      - schema-registry
+    command: sh -c "sleep 50 && exec \"$0\" \"$@\""
+
+  stream-app:
+    build:
+      context: .
+      dockerfile: kafka-simple-stream/Dockerfile
+    environment:
+      - KAFKA_BROKERS=kafka1:9092,kafka2:9092,kafka3:9092
+      - SCHEMA_REGISTRY=http://schema-registry:8081
+      - MAVEN_OPTS=-X
+    networks:
+      - kafka_network
+    volumes:
+      - ./infrastructure/stream:/app/kafka-stream-state
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+      - schema-registry
+    command: sh -c "sleep 40 && exec \"$0\" \"$@\""
+
+
   redpanda-console:
     image: docker.redpanda.com/redpandadata/console:latest
     ports:

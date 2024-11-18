@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Main {
-    private static final int TARGET_RATE = 2000;
-    private static final int BATCH_SIZE = 10;
+    private static final int TARGET_RATE = Integer.parseInt(System.getenv("TARGET_RATE"));
+    private static final int BATCH_SIZE = Integer.parseInt(System.getenv("BATCH_SIZE"));
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {

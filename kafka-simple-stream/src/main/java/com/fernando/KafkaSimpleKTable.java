@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Properties;
 
 public class KafkaSimpleKTable {
-    private static final String bootstrapServers = "127.0.0.1:19090,127.0.0.1:19091,127.0.0.1:19092";
+    private static final String bootstrapServers = System.getenv("KAFKA_BROKERS");
     private static final Logger logger = LoggerFactory.getLogger(KafkaSimpleKTable.class);
     private static final Properties props = new Properties();
     private static final SpecificAvroSerde<ProposalCreatedEvent> proposalSerde = new SpecificAvroSerde<>();
@@ -32,11 +32,11 @@ public class KafkaSimpleKTable {
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG,
                 LogAndContinueExceptionHandler.class);
-        props.put(StreamsConfig.STATE_DIR_CONFIG, "/Users/fernandoareias/Documents/dev/kafka-stream/infrastructure/stream");
+        props.put(StreamsConfig.STATE_DIR_CONFIG, "/app/kafka-stream-state");
         props.put("allow.auto.create.topics", "false");
 
         final Map<String, String> serdeConfig = new HashMap<>();
-        serdeConfig.put("schema.registry.url", "http://localhost:8081");
+        serdeConfig.put("schema.registry.url", System.getenv("SCHEMA_REGISTRY"));
         serdeConfig.put("auto.register.schemas", "true");
 
         proposalSerde.configure(serdeConfig, false);
