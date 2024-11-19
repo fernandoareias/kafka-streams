@@ -19,8 +19,8 @@ Ensure you have the following installed:
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/kafka-streams-poc.git
-cd kafka-streams-poc
+git clone https://github.com/fernandoareias/kafka-streams.git
+cd kafka-streams
 ```
 
 ### Step 2: Compile the Modules
